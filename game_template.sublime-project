@@ -1,0 +1,38 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+		},
+	],
+	"settings": {
+		"LSP": {
+			"clangd": {
+				"enabled": true,
+				"compile_commands": "build/compile_commands.json",
+				"header_insertion": "never",
+			},
+		},
+	},
+	"build_systems":
+	[
+		{
+			"name": "C - Debug Build",
+			"selector": "source.c",
+			"working_dir": "${project_path}",
+			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$",
+			"linux": {
+				"cmd": ["cmake", "--build", "--preset", "debug"],
+			},
+			"variants": [
+				{
+					"name": "Run",
+					"shell_cmd": "cmake --build --preset debug && ./bin/Debug/game",
+				}
+			],
+		}
+	],
+	"debugger_configurations":
+	[
+	],
+}

@@ -1,0 +1,57 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_C_STANDARD": "11",
+        "CMAKE_C_STANDARD_REQUIRED": "ON",
+        "CMAKE_C_EXTENSIONS": "OFF",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin/Debug",
+        "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/bin/Debug",
+        "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/bin/Debug"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin/Release",
+        "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/bin/Release",
+        "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/bin/Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "configuration": "Release"
+    }
+  ]
+}
