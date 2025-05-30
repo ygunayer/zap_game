@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(game VERSION 0.0.1 LANGUAGES C)
+project(zap_game VERSION 0.0.1 LANGUAGES C)
 
 set(GAME_COMPILE_FLAGS -Wall -Wextra -Wpedantic)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -42,6 +42,7 @@ if(WIN32)
     d3d11.lib
     dxgi.lib
     d3dcompiler.lib
+    dxguid.lib
   )
 elseif(APPLE)
   target_compile_definitions(${GAME_LIB_TARGET_NAME} PRIVATE PLATFORM_MACOS)

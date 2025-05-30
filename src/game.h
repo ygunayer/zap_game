@@ -17,7 +17,17 @@
   #include "stdafx.h"
 #endif
 
+#include "linalg.h"
 #include "renderer.h"
+
+typedef struct Transform {
+  Vec3 position;
+  Vec3 rotation;
+  Vec3 scale;
+
+  Mat4x4 model_matrix;
+  bool dirty;
+} Transform;
 
 typedef uint64_t tick_t;
 

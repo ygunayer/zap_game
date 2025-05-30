@@ -1,6 +1,52 @@
-#include "game.h"
 #include <assert.h>
 #include <stdio.h>
+
+#include "game.h"
+
+static const char DEFAULT_D3D_VERTEX_SHADER[] =
+  "cbuffer g_TransformBuffer: register(b0) {                                       \n"
+  "  matrix g_WorldViewProj;                                                       \n"
+  "};                                                                              \n"
+  "                                                                                \n"
+  "struct vs_in {                                                                  \n"
+  "  float4 in_Color: COLOR;                                                       \n"
+  "  float3 in_Position: POSITION;                                                 \n"
+  "  float2 in_TexCoord: TEXCOORD0;                                                \n"
+  "};                                                                              \n"
+  "                                                                                \n"
+  "struct vs_out {                                                                 \n"
+  "  float4 out_Position: SV_POSITION;                                             \n"
+  "  float4 out_Color: COLOR;                                                      \n"
+  "  float2 out_TexCoord: TEXCOORD0;                                               \n"
+  "};                                                                              \n"
+  "                                                                                \n"
+  "vs_out VSMain(vs_in input) {                                                    \n"
+  "  vs_out output;                                                                \n"
+  "  output.out_Position = mul(float4(input.in_Position, 1.0f), g_WorldViewProj);  \n"
+  "  output.out_Color = input.in_Color;                                            \n"
+  "  output.out_TexCoord = input.in_TexCoord;                                      \n"
+  "  return output;                                                                \n"
+  "}                                                                               \n";
+static const size_t DEFAULT_D3D_VERTEX_SHADER_LEN = strlen(DEFAULT_D3D_VERTEX_SHADER);
+
+static const char DEFAULT_D3D_PIXEL_SHADER[] =
+  "Texture2D g_Texture: register(t0);                                   \n"
+  "SamplerState s_Sampler: register(s0);                                \n"
+  "                                                                     \n"
+  "struct PS_INPUT {                                                    \n"
+  "  float4 in_Position: SV_POSITION;                                   \n"
+  "  float4 in_Color: COLOR;                                            \n"
+  "  float2 in_TexCoord: TEXCOORD0;                                     \n"
+  "};                                                                   \n"
+  "                                                                     \n"
+  "// Pixel shader main function                                        \n"
+  "float4 PSMain(PS_INPUT input): SV_TARGET {                           \n"
+  "  float4 texColor = g_Texture.Sample(s_Sampler, input.in_TexCoord);  \n"
+  "  float4 out_Color = texColor * input.in_Color;                      \n"
+  "  return out_Color;                                                  \n"
+  "}                                                                    \n";
+
+static const size_t DEFAULT_D3D_PIXEL_SHADER_LEN = strlen(DEFAULT_D3D_PIXEL_SHADER);
 
 bool game_init(Game* game, zap_window_t window) {
   assert(game);
@@ -23,6 +69,16 @@ bool game_init(Game* game, zap_window_t window) {
 
   if (!renderer_init(&game->renderer, window)) {
     // TODO propagate error
+    return false;
+  }
+
+  ID3D11PixelShader* ps = NULL;
+  if (!renderer_compile_pixel_shader(&game->renderer, DEFAULT_D3D_PIXEL_SHADER, DEFAULT_D3D_PIXEL_SHADER_LEN, ps)) {
+    return false;
+  }
+
+  ID3D11VertexShader* vs = NULL;
+  if (!renderer_compile_vertex_shader(&game->renderer, DEFAULT_D3D_VERTEX_SHADER, DEFAULT_D3D_VERTEX_SHADER_LEN, vs)) {
     return false;
   }
 
@@ -95,7 +151,27 @@ void game_tick(Game* game, tick_t ticks) {
 }
 
 void game_update(Game *game, float delta) {
+  static float color[4] = {.4f, .3f, .4f, 1.f};
+  renderer_clear_color(&game->renderer, color);
+  renderer_present(&game->renderer);
 
+  static float dr = 0.3f;
+  static float dg = 0.4f;
+  static float db = 0.5f;
+  
+  color[0] += dr * delta;
+  color[1] += dg * delta;
+  color[2] += db * delta;
+  
+  // Smooth bouncing at boundaries
+  if (color[0] > 1.0f) { color[0] = 1.0f; dr = -dr; }
+  if (color[0] < 0.0f) { color[0] = 0.0f; dr = -dr; }
+  
+  if (color[1] > 1.0f) { color[1] = 1.0f; dg = -dg; }
+  if (color[1] < 0.0f) { color[1] = 0.0f; dg = -dg; }
+
+  if (color[2] > 1.0f) { color[2] = 1.0f; db = -db; }
+  if (color[2] < 0.0f) { color[2] = 0.0f; db = -db; }
 }
 
 void game_fixed_update(Game *game, float delta) {
